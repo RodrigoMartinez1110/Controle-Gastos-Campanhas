@@ -32,6 +32,8 @@ elif ferramenta == 'SMS':
         valor_unitario = 0.05
     elif plataforma in ['Zenvia', 'Pontal']:
         valor_unitario = 0.047
+elif ferramenta == 'Whatsapp':
+    valor_unitario = 0.046
 
 gasto = round(quantidade * valor_unitario, 2)
 
