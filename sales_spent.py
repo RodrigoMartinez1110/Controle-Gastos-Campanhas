@@ -1,6 +1,7 @@
 import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from datetime import date
 
 # Autenticação com Google Sheets via secrets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -52,21 +53,24 @@ if ferramenta == "RCS":
     st.write(f"→ RCS: {quantidade_rcs} unidades | Gasto: R$ {gasto_rcs}")
     st.write(f"→ SMS: {quantidade_sms} unidades | Gasto: R$ {gasto_sms}")
 
+# Data de hoje
+data_hoje = date.today().strftime("%d/%m/%Y")
+
 # Enviar
 if st.button("Enviar para Google Sheets"):
     if campanha and ferramenta and plataforma:
         if ferramenta == "RCS":
             # Adiciona RCS (ajustada)
             if quantidade_rcs > 0:
-                linha_rcs = [campanha, convenio, produto, plataforma, "RCS", quantidade_rcs, gasto_rcs]
+                linha_rcs = [campanha, data_hoje, convenio, produto, plataforma, "RCS", quantidade_rcs, gasto_rcs]
                 worksheet.append_row(linha_rcs)
             # Adiciona SMS
             if quantidade_sms > 0:
-                linha_sms = [campanha, convenio, produto, plataforma, "SMS", quantidade_sms, gasto_sms]
+                linha_sms = [campanha, data_hoje, convenio, produto, plataforma, "SMS", quantidade_sms, gasto_sms]
                 worksheet.append_row(linha_sms)
         else:
             # Caso SMS ou Whatsapp
-            linha = [campanha, convenio, produto, plataforma, ferramenta, quantidade_total, gasto]
+            linha = [campanha, data_hoje, convenio, produto, plataforma, ferramenta, quantidade_total, gasto]
             worksheet.append_row(linha)
 
         st.success("Dados enviados com sucesso!")
