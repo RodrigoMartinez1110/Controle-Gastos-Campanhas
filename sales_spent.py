@@ -21,45 +21,53 @@ produto = parts[2] if len(parts) > 2 else ""
 
 plataforma = st.selectbox("Plataforma", ["Hyperflow", "Pontal", "Zenvia"])
 ferramenta = st.selectbox("Ferramenta", ["RCS", "SMS", "Whatsapp"])
-quantidade = st.number_input("Quantidade", min_value=0, step=1)
+quantidade_total = st.number_input("Quantidade", min_value=0, step=1)
+
+quantidade_sms = 0
+quantidade_rcs = quantidade_total
+
+# Se a ferramenta for RCS, permitir digitar a quantidade de SMS
+if ferramenta == "RCS":
+    quantidade_sms = st.number_input("Quantidade de SMS (inclusa no total)", min_value=0, max_value=quantidade_total, step=1)
+    quantidade_rcs = quantidade_total - quantidade_sms
 
 # Define valor unitário
-valor_unitario = 0.0
-if ferramenta == 'RCS':
-    valor_unitario = 0.105
-elif ferramenta == 'SMS':
-    if plataforma == 'Hyperflow':
-        valor_unitario = 0.05
-    elif plataforma in ['Zenvia', 'Pontal']:
-        valor_unitario = 0.047
-elif ferramenta == 'Whatsapp':
-    valor_unitario = 0.046
+valor_unitario_rcs = 0.105
+valor_unitario_sms = 0.05 if plataforma == 'Hyperflow' else 0.047
+valor_unitario_whatsapp = 0.046
 
-gasto = round(quantidade * valor_unitario, 2)
+gasto_rcs = round(quantidade_rcs * valor_unitario_rcs, 2) if ferramenta == "RCS" else 0.0
+gasto_sms = round(quantidade_sms * valor_unitario_sms, 2) if ferramenta == "RCS" else 0.0
+gasto = round(quantidade_total * {
+    "RCS": valor_unitario_rcs,
+    "SMS": valor_unitario_sms,
+    "Whatsapp": valor_unitario_whatsapp
+}[ferramenta], 2)
 
 # Exibição
 st.write(f"**Convênio detectado:** `{convenio}`")
 st.write(f"**Produto detectado:** `{produto}`")
-st.write(f"**Gasto calculado:** R$ {gasto}")
-
-# Caso a ferramenta seja RCS e a plataforma seja Hyperflow, exibe um novo campo de input
-nova_quantidade = None
-if ferramenta == "RCS" and plataforma == "Hyperflow":
-    nova_quantidade = st.number_input("Digite a nova quantidade para SMS", min_value=0, step=1)
+st.write(f"**Gasto total estimado:** R$ {gasto}")
+if ferramenta == "RCS":
+    st.write(f"→ RCS: {quantidade_rcs} unidades | Gasto: R$ {gasto_rcs}")
+    st.write(f"→ SMS: {quantidade_sms} unidades | Gasto: R$ {gasto_sms}")
 
 # Enviar
 if st.button("Enviar para Google Sheets"):
     if campanha and ferramenta and plataforma:
-        linha = [campanha, convenio, produto, plataforma, ferramenta, quantidade, gasto]
-        worksheet.append_row(linha)
-
-        # Se a nova quantidade for preenchida, adicionar uma nova linha com a ferramenta "SMS"
-        if nova_quantidade is not None and nova_quantidade > 0:
-            # Atualiza o gasto para a ferramenta SMS
-            valor_unitario_sms = 0.047 if plataforma in ['Hyperflow', 'Pontal'] else 0.05
-            gasto_sms = round(nova_quantidade * valor_unitario_sms, 2)
-            linha_sms = [campanha, convenio, produto, plataforma, "SMS", nova_quantidade, gasto_sms]
-            worksheet.append_row(linha_sms)
+        if ferramenta == "RCS":
+            # Adiciona RCS (ajustada)
+            if quantidade_rcs > 0:
+                linha_rcs = [campanha, convenio, produto, plataforma, "RCS", quantidade_rcs, gasto_rcs]
+                worksheet.append_row(linha_rcs)
+            # Adiciona SMS
+            if quantidade_sms > 0:
+                linha_sms = [campanha, convenio, produto, plataforma, "SMS", quantidade_sms, gasto_sms]
+                worksheet.append_row(linha_sms)
+        else:
+            # Caso SMS ou Whatsapp
+            linha = [campanha, convenio, produto, plataforma, ferramenta, quantidade_total, gasto]
+            worksheet.append_row(linha)
 
         st.success("Dados enviados com sucesso!")
     else:
