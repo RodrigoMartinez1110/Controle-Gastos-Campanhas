@@ -54,7 +54,7 @@ if ferramenta == "RCS":
     st.write(f"→ SMS: {quantidade_sms} unidades | Gasto: R$ {gasto_sms}")
 
 # Data de hoje
-data_hoje = date.today().strftime("%Y-%m-%d")
+data_hoje = date.today().strftime("%d/%m/%Y")
 
 # Enviar
 if st.button("Enviar para Google Sheets"):
