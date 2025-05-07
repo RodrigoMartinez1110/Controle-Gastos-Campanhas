@@ -55,11 +55,8 @@ if ferramenta == "RCS":
 
 # Data de hoje
 data_hoje = date.today().strftime("%d/%m/%Y")
-# Campo editável com data
 data_hoje = st.date_input("Data da campanha", value=date.today())
-
-# Formata como string dd/mm/yyyy
-data_hoje = data_hoje.strftime("%d/%m/%Y")  # NÃO usar apóstrofo
+data_hoje = data_hoje.strftime("%d/%m/%y")  # dd/mm/yy
 
 
 
