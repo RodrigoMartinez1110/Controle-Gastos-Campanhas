@@ -56,6 +56,8 @@ if ferramenta == "RCS":
 # Data de hoje
 data_hoje = date.today().strftime("%d/%m/%Y")
 data_hoje = st.date_input("Data da campanha", value=date.today())
+data_hoje = data_hoje.strftime("%Y-%m-%d")
+
 
 
 # Enviar
